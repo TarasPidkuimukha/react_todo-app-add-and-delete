@@ -3,16 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserWarning } from './UserWarning';
 import { USER_ID, deleteTodo, getTodos, postTodos } from './api/todos';
-import { Todo } from './types/Todo';
+import { Todo, TodoWithoutId } from './types/Todo';
 import classNames from 'classnames';
+import { TodoFilter } from './enums/TodoFilter.enum';
 
 export const App: React.FC = () => {
   const [title, setTitle] = useState('');
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [filterStatus, setFilterStatus] = useState<
-    'all' | 'active' | 'completed'
-  >('all');
+  const [filterStatus, setFilterStatus] = useState<TodoFilter>(TodoFilter.All);
 
   const [deleting, setDeleting] = useState<number[]>([]);
 
@@ -41,7 +40,8 @@ export const App: React.FC = () => {
       completed: false,
     });
 
-    const newTodo = {
+    //TODO: implement interface for TodoItem and use it instead of any
+    const newTodo: TodoWithoutId = {
       title: trimmed,
       userId: USER_ID,
       completed: false,
@@ -103,11 +103,11 @@ export const App: React.FC = () => {
 
   //filtering logic
   const visibleTodos = todos.filter(todo =>
-    filterStatus === 'active'
+    filterStatus === TodoFilter.Active
       ? !todo.completed
-      : filterStatus === 'completed'
+      : filterStatus === TodoFilter.Completed
         ? todo.completed
-        : filterStatus === 'all',
+        : filterStatus === TodoFilter.All,
   );
 
   //focus
@@ -223,11 +223,11 @@ export const App: React.FC = () => {
                 <a
                   href="#/"
                   className={classNames('filter__link', {
-                    selected: filterStatus === 'all',
+                    selected: filterStatus === TodoFilter.All,
                   })}
                   onClick={event => {
                     event.preventDefault();
-                    setFilterStatus('all');
+                    setFilterStatus(TodoFilter.All);
                   }}
                   data-cy="FilterLinkAll"
                 >
@@ -236,12 +236,12 @@ export const App: React.FC = () => {
                 <a
                   href="#/active"
                   className={classNames('filter__link', {
-                    selected: filterStatus === 'active',
+                    selected: filterStatus === TodoFilter.Active,
                   })}
                   data-cy="FilterLinkActive"
                   onClick={event => {
                     event.preventDefault();
-                    setFilterStatus('active');
+                    setFilterStatus(TodoFilter.Active);
                   }}
                 >
                   Active
@@ -249,12 +249,12 @@ export const App: React.FC = () => {
                 <a
                   href="#/completed"
                   className={classNames('filter__link', {
-                    selected: filterStatus === 'completed',
+                    selected: filterStatus === TodoFilter.Completed,
                   })}
                   data-cy="FilterLinkCompleted"
                   onClick={event => {
                     event.preventDefault();
-                    setFilterStatus('completed');
+                    setFilterStatus(TodoFilter.Completed);
                   }}
                 >
                   Completed
@@ -275,6 +275,7 @@ export const App: React.FC = () => {
             </footer>
           </div>
         )}
+
         <div
           data-cy="ErrorNotification"
           className={classNames(
